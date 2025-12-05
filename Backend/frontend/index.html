@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Document Enhancer - Frontend</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="container">
+    <h1>Document Enhancer</h1>
+
+    <section class="card">
+      <label for="fileInput">Choose a text file (.txt) or paste text</label>
+      <input id="fileInput" type="file" accept=".txt,.md" />
+      <textarea id="textInput" placeholder="Or paste your document text here..." rows="8"></textarea>
+      <div class="controls">
+        <button id="processBtn">Process Document</button>
+        <button id="downloadBtn" disabled>Download Results</button>
+      </div>
+    </section>
+
+    <section class="card results">
+      <h2>Results</h2>
+      <div id="status" class="status">Idle</div>
+
+      <h3>Summary</h3>
+      <pre id="summary" class="output"></pre>
+
+      <h3>Key Points</h3>
+      <pre id="keypoints" class="output"></pre>
+
+      <h3>Executive Summary</h3>
+      <pre id="exec" class="output"></pre>
+
+      <h3>Analysis</h3>
+      <pre id="analysis" class="output"></pre>
+
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

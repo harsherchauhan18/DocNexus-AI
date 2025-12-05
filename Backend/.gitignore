@@ -1,0 +1,12 @@
+node_modules/
+outputs 
+.env 
+README.md 
+COMPLETE_OVERVIEW.md
+DEVELOPMENT.md
+PROJECT_MANIFEST.md
+QUICK_REFERENCE.md
+dist/
+SETUP_COMPLETE.md
+TESTING.md
+
