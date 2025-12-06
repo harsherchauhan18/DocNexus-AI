@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../src/context/AuthContext";
 
 // AuthForm component moved outside to prevent re-creation on every render
 const AuthForm = ({ type, email, setEmail, password, setPassword, handleSubmit, isLoading }) => (
@@ -49,13 +51,15 @@ const AuthForm = ({ type, email, setEmail, password, setPassword, handleSubmit, 
   </div>
 );
 
-const PowerRangersLogin = () => {
+const LoginSignup = () => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [authMode, setAuthMode] = useState("default");
   const [error, setError] = useState(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  
+  const navigate = useNavigate();
+  const { login, signup, forgotPassword, loading } = useAuth();
 
   const handleFlip = () => {
     setError(null);
@@ -64,20 +68,26 @@ const PowerRangersLogin = () => {
     setIsSignUp(!isSignUp);
   };
 
-  const handleSubmit = (type) => {
+  const handleSubmit = async (type) => {
     setError(null);
-    setIsLoading(true);
 
-    setTimeout(() => {
-      console.log(`${type}:`, email, password);
-      setIsLoading(false);
-      if (type === "signup") {
+    try {
+      if (type === "login") {
+        await login(email, password);
+        // Navigate to homepage on successful login
+        navigate("/");
+      } else if (type === "signup") {
+        await signup(email, password);
+        // Show success message and flip to login
         handleFlip();
-        setTimeout(() => setError("Account created! Please sign in."), 600);
+        setTimeout(() => setError("Account created! Please check your email to verify."), 600);
+      } else if (type === "forgot") {
+        await forgotPassword(email);
+        setEmail("");
       }
-      setEmail("");
-      setPassword("");
-    }, 1000);
+    } catch (err) {
+      setError(err.message || "An error occurred");
+    }
   };
 
   return (
@@ -131,7 +141,7 @@ const PowerRangersLogin = () => {
                       password={password}
                       setPassword={setPassword}
                       handleSubmit={handleSubmit}
-                      isLoading={isLoading}
+                      isLoading={loading}
                     />
                   )}
 
@@ -195,7 +205,7 @@ const PowerRangersLogin = () => {
                       password={password}
                       setPassword={setPassword}
                       handleSubmit={handleSubmit}
-                      isLoading={isLoading}
+                      isLoading={loading}
                     />
                   )}
 
@@ -253,7 +263,7 @@ const PowerRangersLogin = () => {
               password={password}
               setPassword={setPassword}
               handleSubmit={handleSubmit}
-              isLoading={isLoading}
+              isLoading={loading}
             />
 
             <button
@@ -302,4 +312,4 @@ const PowerRangersLogin = () => {
   );
 };
 
-export default PowerRangersLogin;
+export default LoginSignup;

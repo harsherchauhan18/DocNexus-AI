@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 
 // Configure axios to send cookies with every request.
 const api = axios.create({
-	baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
+	baseURL: "http://localhost:8000",
 	withCredentials: true,
 	headers: {
 		"Content-Type": "application/json",
@@ -71,7 +71,7 @@ export const handleSignUp = createAsyncThunk(
 	"auth/handleSignUp",
 	async ({ email, password }, { rejectWithValue }) => {
 		try {
-			const response = await api.post("/users/signup", { email, password });
+			const response = await api.post("/register", { email, password });
 			return response.data;
 		} catch (error) {
 			return rejectWithValue(error.response?.data?.message || "Signup failed");

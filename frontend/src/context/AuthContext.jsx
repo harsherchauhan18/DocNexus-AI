@@ -74,7 +74,9 @@ export const AuthProvider = ({ children }) => {
       toast.success("Verification link sent to your email. Please check your inbox.");
       return true;
     } catch (err) {
-      const errorMessage = err.response?.data?.message || "Signup failed";
+      console.error("Signup error:", err);
+      console.error("Error response:", err.response);
+      const errorMessage = err.response?.data?.message || err.message || "Signup failed";
       setError(errorMessage);
       toast.error(errorMessage);
       throw new Error(errorMessage);

@@ -40,12 +40,15 @@ export const registerUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    if (!username || !email || !password) {
-      return res.status(400).json({ message: "Username, email, and password are required" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
     }
 
-    const normalizedUsername = username.trim().toLowerCase();
     const normalizedEmail = email.trim().toLowerCase();
+    // Auto-generate username from email if not provided
+    const normalizedUsername = username 
+      ? username.trim().toLowerCase() 
+      : normalizedEmail.split('@')[0];
 
     const existingUser = await User.findOne({
       $or: [{ username: normalizedUsername }, { email: normalizedEmail }],
@@ -79,11 +82,26 @@ export const registerUser = async (req, res) => {
     const refreshToken = signRefreshToken(user);
     await storeRefreshToken(user, refreshToken);
 
+    // Set cookies for tokens
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     return res.status(201).json({
       message: "User registered successfully",
-      user: sanitizeUser(user),
-      accessToken,
-      refreshToken,
+      data: {
+        user: sanitizeUser(user),
+      },
     });
   } catch (error) {
     console.error("registerUser error", error);
@@ -118,15 +136,84 @@ export const loginUser = async (req, res) => {
     const refreshToken = signRefreshToken(user);
     await storeRefreshToken(user, refreshToken);
 
+    // Set cookies for tokens
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 15 * 60 * 1000, // 15 minutes
+    });
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    });
+
     return res.status(200).json({
       message: "Login successful",
-      user: sanitizeUser(user),
-      accessToken,
-      refreshToken,
+      data: {
+        user: sanitizeUser(user),
+      },
     });
   } catch (error) {
     console.error("loginUser error", error);
     return res.status(500).json({ message: "Unable to login", error: error.message });
+  }
+};
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    return res.status(200).json({
+      message: "User retrieved successfully",
+      data: {
+        user: sanitizeUser(user),
+      },
+    });
+  } catch (error) {
+    console.error("getCurrentUser error", error);
+    return res.status(500).json({ message: "Unable to get user", error: error.message });
+  }
+};
+
+export const logoutUser = async (req, res) => {
+  try {
+    const userId = req.user?._id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    const user = await User.findById(userId);
+
+    if (user) {
+      user.refreshToken = null;
+      await user.save({ validateBeforeSave: false });
+    }
+
+    // Clear cookies
+    res.clearCookie("accessToken");
+    res.clearCookie("refreshToken");
+
+    return res.status(200).json({
+      message: "Logout successful",
+    });
+  } catch (error) {
+    console.error("logoutUser error", error);
+    return res.status(500).json({ message: "Unable to logout", error: error.message });
   }
 };
 
