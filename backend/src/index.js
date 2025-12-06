@@ -9,7 +9,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: (process.env.CORS_ORIGIN || "*").split(","),
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
     credentials: true,
   })
 );
@@ -36,7 +36,7 @@ app.use((err, _req, res, _next) => {
   });
 });
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 8000;
 
 const startServer = async () => {
   try {
