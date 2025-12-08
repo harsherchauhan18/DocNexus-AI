@@ -53,9 +53,8 @@ export const uploadDocument = async (file, onProgress) => {
  * @returns {Promise<Object>} - Documents list
  */
 export const getDocuments = async (page = 1, limit = 10) => {
-  const response = await axios.get(`${API_BASE_URL}/documents`, {
+  const response = await api.get("/documents", {
     params: { page, limit },
-    withCredentials: true,
   });
 
   return response.data;
@@ -67,9 +66,7 @@ export const getDocuments = async (page = 1, limit = 10) => {
  * @returns {Promise<Object>} - Document details
  */
 export const getDocumentById = async (id) => {
-  const response = await axios.get(`${API_BASE_URL}/documents/${id}`, {
-    withCredentials: true,
-  });
+  const response = await api.get(`/documents/${id}`);
 
   return response.data;
 };
@@ -82,9 +79,8 @@ export const getDocumentById = async (id) => {
  * @returns {Promise<Object>} - Search results
  */
 export const searchDocuments = async (query, page = 1, limit = 10) => {
-  const response = await axios.get(`${API_BASE_URL}/documents/search`, {
+  const response = await api.get("/documents/search", {
     params: { q: query, page, limit },
-    withCredentials: true,
   });
 
   return response.data;
@@ -96,9 +92,8 @@ export const searchDocuments = async (query, page = 1, limit = 10) => {
  * @returns {Promise<Object>} - Document history
  */
 export const getDocumentHistory = async (limit = 20) => {
-  const response = await axios.get(`${API_BASE_URL}/documents/history`, {
+  const response = await api.get("/documents/history", {
     params: { limit },
-    withCredentials: true,
   });
 
   return response.data;
@@ -110,9 +105,7 @@ export const getDocumentHistory = async (limit = 20) => {
  * @returns {Promise<Object>} - Delete response
  */
 export const deleteDocument = async (id) => {
-  const response = await axios.delete(`${API_BASE_URL}/documents/${id}`, {
-    withCredentials: true,
-  });
+  const response = await api.delete(`/documents/${id}`);
 
   return response.data;
 };
