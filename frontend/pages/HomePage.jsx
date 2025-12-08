@@ -219,6 +219,47 @@ const HomePage = () => {
           ) : (
             // Document List View
             <div className="max-w-6xl mx-auto">
+              {/* Page-Level Summary */}
+              {documents.length > 0 && (
+                <div className="mb-8 p-6 bg-gray-800 bg-opacity-40 rounded-2xl border border-yellow-500 border-opacity-30">
+                  <h2 className="text-2xl font-bold text-yellow-400 mb-4">
+                    📊 Page Summary
+                  </h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border border-yellow-500 border-opacity-20">
+                      <div className="text-yellow-500 text-sm mb-1">Total Documents</div>
+                      <div className="text-3xl font-bold text-yellow-400">{documents.length}</div>
+                    </div>
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border border-yellow-500 border-opacity-20">
+                      <div className="text-yellow-500 text-sm mb-1">Document Types</div>
+                      <div className="text-sm text-yellow-100 text-opacity-70 mt-2 space-y-1">
+                        {Object.entries(
+                          documents.reduce((acc, doc) => {
+                            const type = doc.documentType || 'Unknown';
+                            acc[type] = (acc[type] || 0) + 1;
+                            return acc;
+                          }, {})
+                        ).map(([type, count]) => (
+                          <div key={type} className="flex justify-between">
+                            <span>{type}:</span>
+                            <span className="text-yellow-400 font-semibold">{count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border border-yellow-500 border-opacity-20">
+                      <div className="text-yellow-500 text-sm mb-1">Sensitive Data</div>
+                      <div className="text-3xl font-bold text-red-400">
+                        {documents.filter(doc => doc.hasSensitiveData).length}
+                      </div>
+                      <div className="text-xs text-red-400 text-opacity-70 mt-1">
+                        documents contain sensitive info
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Upload Section */}
               <div className="mb-12">
                 <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">
