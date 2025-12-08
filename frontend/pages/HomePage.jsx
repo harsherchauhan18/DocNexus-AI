@@ -1,62 +1,103 @@
-import React, { useState, useRef, useEffect } from "react";
-import { Send, Sparkles, Zap, Shield, Menu, Plus } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Zap, Shield, Menu, Plus, LogOut, Loader } from "lucide-react";
+import { useAuth } from "../src/context/AuthContext";
+import { useNavigate } from "react-router-dom";
+import FileUpload from "../src/components/FileUpload";
+import DocumentCard from "../src/components/DocumentCard";
+import SearchBar from "../src/components/SearchBar";
+import DocumentHistory from "../src/components/DocumentHistory";
+import { getDocuments, searchDocuments, deleteDocument } from "../src/services/documentService";
 
-const PowerRangersHome = () => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-  const [isTyping, setIsTyping] = useState(false);
+const HomePage = () => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const [documents, setDocuments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchMode, setSearchMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    loadDocuments();
+  }, []);
 
-  const examplePrompts = [
-    { icon: "⚡", text: "What's your ranger color?" },
-    { icon: "🤖", text: "Tell me about the Morphin Grid" },
-    { icon: "🎯", text: "Create a training schedule" },
-    { icon: "💎", text: "Explain Power Coins" }
-  ];
+  // Auto-refresh documents every 5 seconds if there's a processing document
+  useEffect(() => {
+    const hasProcessingDoc = documents.some(doc => doc.processingStatus === 'processing');
+    if (hasProcessingDoc || isProcessing) {
+      const interval = setInterval(() => {
+        loadDocuments();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [documents, isProcessing]);
 
-  const conversations = [
-    { title: "Zord Training Protocol", time: "2h ago" },
-    { title: "Command Center Systems", time: "Yesterday" },
-    { title: "Ranger Team Strategy", time: "3 days ago" }
-  ];
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userMessage = { role: "user", content: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput("");
-    setIsTyping(true);
-
-    setTimeout(() => {
-      const responses = [
-        "It's Morphin Time! I'm here to help you navigate the Command Center and answer your questions about being a Power Ranger.",
-        "Alpha 5 here! Well, actually I'm your AI assistant. What would you like to know about the Morphin Grid?",
-        "Rangers, I'm detecting your query. Let me analyze the situation and provide you with the best possible response.",
-        "Zordon would be proud! Let's tackle this mission together. How can I assist you today?"
-      ];
-      
-      const aiMessage = {
-        role: "assistant",
-        content: responses[Math.floor(Math.random() * responses.length)]
-      };
-      
-      setMessages(prev => [...prev, aiMessage]);
-      setIsTyping(false);
-    }, 1500);
+  const loadDocuments = async () => {
+    try {
+      setLoading(true);
+      const response = await getDocuments(1, 20);
+      if (response.success) {
+        setDocuments(response.data.documents);
+        // Check if any document is still processing
+        const hasProcessing = response.data.documents.some(doc => doc.processingStatus === 'processing');
+        setIsProcessing(hasProcessing);
+      }
+    } catch (error) {
+      console.error("Error loading documents:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handlePromptClick = (text) => {
-    setInput(text);
+  const handleUploadComplete = (newDocument) => {
+    setIsProcessing(true);
+    // Reload documents to get the latest
+    loadDocuments();
+  };
+
+  const handleSearch = async (query) => {
+    try {
+      setLoading(true);
+      setSearchMode(true);
+      setSearchQuery(query);
+      const response = await searchDocuments(query);
+      if (response.success) {
+        setDocuments(response.data.documents);
+      }
+    } catch (error) {
+      console.error("Error searching documents:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleClearSearch = () => {
+    setSearchMode(false);
+    setSearchQuery("");
+    loadDocuments();
+  };
+
+  const handleViewDocument = (document) => {
+    setSelectedDocument(document);
+  };
+
+  const handleDeleteDocument = async (documentId) => {
+    try {
+      await deleteDocument(documentId);
+      setDocuments(documents.filter(doc => doc._id !== documentId));
+      // Reload to ensure state is fresh
+      loadDocuments();
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      alert("Failed to delete document. Please try again.");
+    }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
   };
 
   return (
@@ -80,48 +121,44 @@ const PowerRangersHome = () => {
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-lg shadow-yellow-500/50">
               <Zap className="w-6 h-6 text-black" />
             </div>
-            <span className="text-xl font-bold text-yellow-400">Command Center</span>
+            <span className="text-xl font-bold text-yellow-400">DocNexus AI</span>
           </div>
 
-          {/* New Chat Button */}
+          {/* New Document Button */}
           <button
             onClick={() => {
-              setMessages([]);
-              setInput("");
+              setSelectedDocument(null);
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className="w-full mb-6 px-4 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-black font-semibold rounded-lg flex items-center justify-center gap-2 hover:scale-[1.02] transition-transform"
           >
             <Plus className="w-5 h-5" />
-            New Mission
+            Upload Document
           </button>
 
-          {/* Conversations */}
-          <div className="flex-1 overflow-y-auto">
-            <div className="text-xs text-yellow-500 text-opacity-50 mb-2 font-semibold">RECENT MISSIONS</div>
-            <div className="space-y-2">
-              {conversations.map((conv, i) => (
-                <div
-                  key={i}
-                  className="p-3 rounded-lg bg-black bg-opacity-40 border border-yellow-500 border-opacity-20 cursor-pointer hover:bg-opacity-60 transition-all"
-                >
-                  <div className="text-sm text-yellow-400 font-medium truncate">{conv.title}</div>
-                  <div className="text-xs text-yellow-500 text-opacity-50 mt-1">{conv.time}</div>
-                </div>
-              ))}
-            </div>
-          </div>
+          {/* Document History */}
+          <DocumentHistory onDocumentClick={handleViewDocument} />
 
-          {/* User Profile */}
-          <div className="pt-4 border-t border-yellow-500 border-opacity-20">
-            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-black hover:bg-opacity-40 cursor-pointer transition-all">
+          {/* User Profile & Logout */}
+          <div className="pt-4 border-t border-yellow-500 border-opacity-20 space-y-2">
+            <div className="flex items-center gap-3 p-2 rounded-lg bg-black bg-opacity-40">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center">
                 <Shield className="w-5 h-5 text-black" />
               </div>
-              <div className="flex-1">
-                <div className="text-sm font-semibold text-yellow-400">Ranger Alpha</div>
-                <div className="text-xs text-yellow-500 text-opacity-50">Active Status</div>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-semibold text-yellow-400 truncate">
+                  {user?.username || user?.email || 'User'}
+                </div>
+                <div className="text-xs text-yellow-500 text-opacity-50">Active</div>
               </div>
             </div>
+            <button
+              onClick={handleLogout}
+              className="w-full px-4 py-2 bg-red-500 bg-opacity-20 text-red-400 rounded-lg hover:bg-opacity-30 transition-all flex items-center justify-center gap-2"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>
           </div>
         </div>
       </div>
@@ -136,166 +173,107 @@ const PowerRangersHome = () => {
           >
             <Menu className="w-5 h-5 text-yellow-400" />
           </button>
-          <div className="flex-1 text-center">
-            <h1 className="text-lg font-bold text-yellow-400">Ranger AI Assistant</h1>
+          <div className="flex-1 flex justify-center">
+            <SearchBar onSearch={handleSearch} onClear={handleClearSearch} />
           </div>
           <div className="w-9" /> {/* Spacer for centering */}
         </div>
 
-        {/* Messages Area */}
+        {/* Content Area */}
         <div className="flex-1 overflow-y-auto px-6 py-8">
-          {messages.length === 0 ? (
-            <div className="max-w-3xl mx-auto">
-              {/* Welcome Section */}
-              <div className="text-center mb-12 animate-fadeIn">
-                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-2xl shadow-yellow-500/50 animate-spin" style={{ animationDuration: '20s' }}>
-                  <Sparkles className="w-12 h-12 text-black" />
-                </div>
-                <h2 className="text-5xl font-black text-yellow-400 mb-4 drop-shadow-[0_0_30px_rgba(234,179,8,0.5)]">
-                  IT'S MORPHIN TIME!
-                </h2>
-                <p className="text-xl text-yellow-500 text-opacity-70 mb-2">
-                  Welcome to the Command Center
-                </p>
-                <p className="text-sm text-yellow-500 text-opacity-50">
-                  Your AI-powered Ranger assistant is ready to help
-                </p>
-              </div>
-
-              {/* Example Prompts */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {examplePrompts.map((prompt, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handlePromptClick(prompt.text)}
-                    className="p-6 bg-gradient-to-br from-gray-800 to-black border-2 border-yellow-500 border-opacity-30 rounded-2xl hover:border-opacity-60 hover:scale-[1.02] transition-all text-left group"
-                  >
-                    <div className="text-3xl mb-3">{prompt.icon}</div>
-                    <div className="text-yellow-400 font-semibold group-hover:text-yellow-300 transition-colors">
-                      {prompt.text}
+          {selectedDocument ? (
+            // Document Detail View
+            <div className="max-w-4xl mx-auto">
+              <button
+                onClick={() => setSelectedDocument(null)}
+                className="mb-6 text-yellow-400 hover:text-yellow-300 transition-colors"
+              >
+                ← Back to Documents
+              </button>
+              <div className="bg-gradient-to-br from-gray-800 to-black border-2 border-yellow-500 border-opacity-30 rounded-2xl p-8">
+                <h1 className="text-3xl font-bold text-yellow-400 mb-4">
+                  {selectedDocument.originalName}
+                </h1>
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-xl font-semibold text-yellow-400 mb-2">Executive Summary</h2>
+                    <p className="text-yellow-100 text-opacity-70">{selectedDocument.executiveSummary}</p>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-yellow-400 mb-2">Full Summary</h2>
+                    <p className="text-yellow-100 text-opacity-70 whitespace-pre-wrap">{selectedDocument.summary}</p>
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-semibold text-yellow-400 mb-2">Key Points</h2>
+                    <p className="text-yellow-100 text-opacity-70 whitespace-pre-wrap">{selectedDocument.keyPoints}</p>
+                  </div>
+                  {selectedDocument.analysis && (
+                    <div>
+                      <h2 className="text-xl font-semibold text-yellow-400 mb-2">Analysis</h2>
+                      <p className="text-yellow-100 text-opacity-70 whitespace-pre-wrap">{selectedDocument.analysis}</p>
                     </div>
-                  </button>
-                ))}
-              </div>
-
-              {/* Features */}
-              <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="text-center p-4">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-yellow-500 bg-opacity-20 flex items-center justify-center">
-                    <Zap className="w-6 h-6 text-yellow-400" />
-                  </div>
-                  <div className="text-sm font-semibold text-yellow-400 mb-1">Lightning Fast</div>
-                  <div className="text-xs text-yellow-500 text-opacity-50">Instant responses powered by the Morphin Grid</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-yellow-500 bg-opacity-20 flex items-center justify-center">
-                    <Shield className="w-6 h-6 text-yellow-400" />
-                  </div>
-                  <div className="text-sm font-semibold text-yellow-400 mb-1">Secure & Private</div>
-                  <div className="text-xs text-yellow-500 text-opacity-50">Your conversations are protected</div>
-                </div>
-                <div className="text-center p-4">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-lg bg-yellow-500 bg-opacity-20 flex items-center justify-center">
-                    <Sparkles className="w-6 h-6 text-yellow-400" />
-                  </div>
-                  <div className="text-sm font-semibold text-yellow-400 mb-1">Always Learning</div>
-                  <div className="text-xs text-yellow-500 text-opacity-50">Continuously improving abilities</div>
+                  )}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="max-w-3xl mx-auto space-y-6">
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={`flex gap-4 animate-fadeIn ${
-                    msg.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {msg.role === "assistant" && (
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center flex-shrink-0">
-                      <Zap className="w-5 h-5 text-black" />
-                    </div>
-                  )}
-                  <div
-                    className={`max-w-[80%] p-4 rounded-2xl ${
-                      msg.role === "user"
-                        ? "bg-gradient-to-br from-yellow-400 to-yellow-500 text-black"
-                        : "bg-gray-800 bg-opacity-60 border border-yellow-500 border-opacity-30 text-yellow-100"
-                    }`}
-                  >
-                    {msg.content}
+            // Document List View
+            <div className="max-w-6xl mx-auto">
+              {/* Upload Section */}
+              <div className="mb-12">
+                <h2 className="text-3xl font-bold text-yellow-400 mb-6 text-center">
+                  Upload & Analyze Documents
+                </h2>
+                {isProcessing && (
+                  <div className="mb-4 p-4 bg-yellow-500 bg-opacity-10 border border-yellow-500 border-opacity-30 rounded-lg text-center">
+                    <p className="text-yellow-400 font-semibold">
+                      ⏳ Processing previous document... Please wait before uploading another.
+                    </p>
                   </div>
-                  {msg.role === "user" && (
-                    <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center flex-shrink-0">
-                      <Shield className="w-5 h-5 text-yellow-400" />
-                    </div>
-                  )}
+                )}
+                <FileUpload onUploadComplete={handleUploadComplete} disabled={isProcessing} />
+              </div>
+
+              {/* Documents Grid */}
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-yellow-400">
+                    {searchMode ? `Search Results for "${searchQuery}"` : 'Your Documents'}
+                  </h2>
+                  <span className="text-yellow-500 text-opacity-50">
+                    {documents.length} {documents.length === 1 ? 'document' : 'documents'}
+                  </span>
                 </div>
-              ))}
-              {isTyping && (
-                <div className="flex gap-4 animate-fadeIn">
-                  <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center flex-shrink-0">
-                    <Zap className="w-5 h-5 text-black" />
+
+                {loading ? (
+                  <div className="flex items-center justify-center py-20">
+                    <Loader className="w-12 h-12 text-yellow-400 animate-spin" />
                   </div>
-                  <div className="bg-gray-800 bg-opacity-60 border border-yellow-500 border-opacity-30 p-4 rounded-2xl">
-                    <div className="flex gap-2">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" />
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }} />
-                    </div>
+                ) : documents.length === 0 ? (
+                  <div className="text-center py-20">
+                    <p className="text-yellow-500 text-opacity-50 text-lg">
+                      {searchMode ? 'No documents found' : 'No documents yet. Upload your first document above!'}
+                    </p>
                   </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {documents.map((doc) => (
+                      <DocumentCard
+                        key={doc._id}
+                        document={doc}
+                        onView={handleViewDocument}
+                        onDelete={handleDeleteDocument}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
-
-        {/* Input Area */}
-        <div className="border-t border-yellow-500 border-opacity-20 p-6 bg-gray-900 bg-opacity-60 backdrop-blur-sm">
-          <div className="max-w-3xl mx-auto">
-            <div className="relative">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Send a message to Ranger Command..."
-                className="w-full px-6 py-4 pr-14 bg-black bg-opacity-60 rounded-2xl text-white border-2 border-yellow-500 border-opacity-30 focus:border-yellow-500 outline-none text-base transition-all"
-                disabled={isTyping}
-              />
-              <button
-                onClick={handleSend}
-                disabled={!input.trim() || isTyping}
-                className={`absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-xl bg-gradient-to-r from-yellow-400 to-yellow-500 flex items-center justify-center transition-all ${
-                  input.trim() && !isTyping
-                    ? "opacity-100 hover:scale-105 cursor-pointer"
-                    : "opacity-50 cursor-not-allowed"
-                }`}
-              >
-                <Send className="w-5 h-5 text-black" />
-              </button>
-            </div>
-            <div className="mt-3 text-center text-xs text-yellow-500 text-opacity-40">
-              Powered by the Morphin Grid • AI Assistant v4.5
-            </div>
-          </div>
-        </div>
       </div>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-in-out forwards;
-        }
-      `}</style>
     </div>
   );
 };
 
-export default PowerRangersHome;
+export default HomePage;
