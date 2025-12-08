@@ -2,8 +2,8 @@ import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
-import LoginSignup from '../pages/LoginSignup'
-import HomePage from '../pages/HomePage'
+import LoginSignup from './pages/LoginSignup'
+import HomePage from './pages/HomePage'
 
 function App() {
   const { isAuthenticated, loading } = useAuth()
