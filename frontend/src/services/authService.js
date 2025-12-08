@@ -2,12 +2,24 @@ import axios from "axios";
 
 // Configure axios instance with credentials
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8000/api/v1",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1",
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
+
+// Request interceptor to add Authorization header
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
 
 // Response interceptor for handling 401 errors
 api.interceptors.response.use(
@@ -19,7 +31,8 @@ api.interceptors.response.use(
       error.config?.url?.includes("/users/current");
 
     if (error.response?.status === 401 && !isAuthEndpoint) {
-      // Redirect to login if unauthorized
+      // Clear token and redirect to login if unauthorized
+      localStorage.removeItem('accessToken');
       window.location.href = "/login";
     }
     return Promise.reject(error);
@@ -39,7 +52,14 @@ export const checkAuthStatus = async () => {
 // Sign in user
 export const signIn = async (email, password) => {
   const response = await api.post("/users/login", { email, password });
-  return response.data.data.user;
+  const { user, token } = response.data.data;
+  
+  // Store token in localStorage for cross-domain authentication
+  if (token) {
+    localStorage.setItem('accessToken', token);
+  }
+  
+  return user;
 };
 
 // Sign up new user
@@ -72,4 +92,5 @@ export const verifyEmail = async (token) => {
 // Logout user
 export const logout = async () => {
   await api.post("/users/logout");
+  localStorage.removeItem('accessToken');
 };
