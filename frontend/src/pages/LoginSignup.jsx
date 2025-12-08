@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../src/context/AuthContext";
+import { useAuth } from "../context/AuthContext";
+import StarField from "../components/StarField";
 
 // AuthForm component moved outside to prevent re-creation on every render
 const AuthForm = ({ type, email, setEmail, password, setPassword, handleSubmit, isLoading }) => (
@@ -45,7 +46,7 @@ const AuthForm = ({ type, email, setEmail, password, setPassword, handleSubmit, 
           Processing...
         </span>
       ) : (
-        type === "signup" ? "Morph into Ranger" : type === "login" ? "Access Morphin Grid" : "Reset Power Coin"
+        type === "signup" ? "Register to Console" : type === "login" ? "Login to Console" : "Reset Password"
       )}
     </button>
   </div>
@@ -93,10 +94,8 @@ const LoginSignup = () => {
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background */}
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-yellow-500 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-yellow-600 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-yellow-400 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="absolute inset-0 opacity-80">
+      <StarField />
       </div>
 
       {authMode === "default" ? (
@@ -119,11 +118,11 @@ const LoginSignup = () => {
                     <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-lg shadow-yellow-500/50 animate-spin" style={{ animationDuration: '20s' }}>
                       <span className="text-4xl font-bold text-black">⚡</span>
                     </div>
-                    <h2 className="text-4xl font-black text-yellow-400 mb-2 drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]">
-                      Ranger Access
+                    <h2 className="text-2xl font-black text-yellow-400 mb-2 drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]">
+                      Welcome to DocNexus-AI
                     </h2>
                     <p className="text-yellow-500 text-opacity-70 text-sm">
-                      Enter the Command Center
+                      Enter the DocNexus Console
                     </p>
                   </div>
 
@@ -154,18 +153,18 @@ const LoginSignup = () => {
                           setError(null);
                         }}
                       >
-                        Lost your Power Coin?
+                        Reset Password?
                       </button>
 
                       <div className="mt-6 text-center">
                         <p className="text-yellow-500 text-opacity-50 text-sm mb-3">
-                          New Recruit?
+                          New to Console?
                         </p>
                         <button
                           onClick={handleFlip}
                           className="px-8 py-3 bg-transparent border-2 border-yellow-500 text-yellow-400 font-bold rounded-xl cursor-pointer transition-all duration-300 hover:bg-yellow-500 hover:text-black"
                         >
-                          Join the Team
+                          Register to Console
                         </button>
                       </div>
                     </>
