@@ -2,6 +2,25 @@ import axios from "axios";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://docnexus-ai.onrender.com/api/v1";
 
+// Create axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  timeout: 300000, // 5 minutes timeout for processing
+});
+
+// Request interceptor to add Authorization header
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 /**
  * Upload a document
  * @param {File} file - File to upload
@@ -12,12 +31,10 @@ export const uploadDocument = async (file, onProgress) => {
   const formData = new FormData();
   formData.append("document", file);
 
-  const response = await axios.post(`${API_BASE_URL}/documents/upload`, formData, {
+  const response = await api.post("/documents/upload", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
-    withCredentials: true,
-    timeout: 300000, // 5 minutes timeout for processing
     onUploadProgress: (progressEvent) => {
       if (onProgress && progressEvent.total) {
         const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
@@ -36,9 +53,8 @@ export const uploadDocument = async (file, onProgress) => {
  * @returns {Promise<Object>} - Documents list
  */
 export const getDocuments = async (page = 1, limit = 10) => {
-  const response = await axios.get(`${API_BASE_URL}/documents`, {
+  const response = await api.get("/documents", {
     params: { page, limit },
-    withCredentials: true,
   });
 
   return response.data;
@@ -50,9 +66,7 @@ export const getDocuments = async (page = 1, limit = 10) => {
  * @returns {Promise<Object>} - Document details
  */
 export const getDocumentById = async (id) => {
-  const response = await axios.get(`${API_BASE_URL}/documents/${id}`, {
-    withCredentials: true,
-  });
+  const response = await api.get(`/documents/${id}`);
 
   return response.data;
 };
@@ -65,9 +79,8 @@ export const getDocumentById = async (id) => {
  * @returns {Promise<Object>} - Search results
  */
 export const searchDocuments = async (query, page = 1, limit = 10) => {
-  const response = await axios.get(`${API_BASE_URL}/documents/search`, {
+  const response = await api.get("/documents/search", {
     params: { q: query, page, limit },
-    withCredentials: true,
   });
 
   return response.data;
@@ -79,9 +92,8 @@ export const searchDocuments = async (query, page = 1, limit = 10) => {
  * @returns {Promise<Object>} - Document history
  */
 export const getDocumentHistory = async (limit = 20) => {
-  const response = await axios.get(`${API_BASE_URL}/documents/history`, {
+  const response = await api.get("/documents/history", {
     params: { limit },
-    withCredentials: true,
   });
 
   return response.data;
@@ -93,9 +105,7 @@ export const getDocumentHistory = async (limit = 20) => {
  * @returns {Promise<Object>} - Delete response
  */
 export const deleteDocument = async (id) => {
-  const response = await axios.delete(`${API_BASE_URL}/documents/${id}`, {
-    withCredentials: true,
-  });
+  const response = await api.delete(`/documents/${id}`);
 
   return response.data;
 };
