@@ -7,37 +7,39 @@ import { processDocumentForSensitiveData } from "./sensitiveDataMaskingService.j
 import { Document } from "../src/models/document.models.js";
 import fs from "fs";
 import mammoth from "mammoth";
+import { createRequire } from "module";
 
+const require = createRequire(import.meta.url);
 const OCR_API_URL = "https://api.ocr.space/parse/image";
 
 /**
- * Extract text from PDF file
+ * Extract text from PDF file using pdfreader
  * @param {string} filePath - Path to PDF file
  * @returns {Promise<string>} - Extracted text
  */
 const extractTextFromPDF = async (filePath) => {
-  try {
-    // Dynamic import pdf-parse - the module itself is callable
-    const pdfParseModule = await import("pdf-parse");
-    
-    // Debug: log what we got
-    console.log("pdfParseModule type:", typeof pdfParseModule);
-    console.log("pdfParseModule.default type:", typeof pdfParseModule.default);
-    console.log("pdfParseModule keys:", Object.keys(pdfParseModule));
-    
-    // In ES modules, the entire CommonJS export is under 'default'
-    const pdfParse = pdfParseModule.default || pdfParseModule;
-    console.log("pdfParse type:", typeof pdfParse);
-    console.log("pdfParse is function:", typeof pdfParse === 'function');
-    
-    const dataBuffer = fs.readFileSync(filePath);
-    // Call the module directly - it's a callable object
-    const data = await pdfParse(dataBuffer);
-    return data.text;
-  } catch (error) {
-    console.error("Error extracting text from PDF:", error);
-    throw error;
-  }
+  return new Promise((resolve, reject) => {
+    try {
+      const { PdfReader } = require('pdfreader');
+      const reader = new PdfReader();
+      let fullText = "";
+      
+      reader.parseFileItems(filePath, (err, item) => {
+        if (err) {
+          reject(err);
+        } else if (!item) {
+          // End of file
+          resolve(fullText.trim());
+        } else if (item.text) {
+          // Add text with space
+          fullText += item.text + " ";
+        }
+      });
+    } catch (error) {
+      console.error("Error extracting text from PDF:", error);
+      reject(error);
+    }
+  });
 };
 
 /**
