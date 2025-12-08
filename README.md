@@ -504,7 +504,7 @@ const summary = await chain.invoke({ text: documentText });
 
 ---
 
-## 👥 Team
+## 👥 Team OnlyBasics
 
 ### Team Members
 
@@ -547,9 +547,10 @@ This project is licensed under the MNNIT Allahabad.
 
 <div align="center">
 
-**Made with ❤️ by Team DocNexus**
+**Made with ❤️ by Team OnlyBasics**
 
 [⬆ Back to Top](#-docnexus-ai)
 
 </div>
+
 
