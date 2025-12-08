@@ -4,6 +4,7 @@ import { useAuth } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginSignup from './pages/LoginSignup'
 import HomePage from './pages/HomePage'
+import ExtractedTextViewer from './pages/ExtractedTextViewer'
 
 function App() {
   const { isAuthenticated, loading } = useAuth()
@@ -29,6 +30,14 @@ function App() {
         element={
           <ProtectedRoute>
             <HomePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/document/:id/text"
+        element={
+          <ProtectedRoute>
+            <ExtractedTextViewer />
           </ProtectedRoute>
         }
       />

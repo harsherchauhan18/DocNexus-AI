@@ -1,7 +1,7 @@
 import React from 'react';
-import { FileText, Calendar, Tag, Trash2, Eye } from 'lucide-react';
+import { FileText, Calendar, Tag, Trash2, Eye, FileSearch } from 'lucide-react';
 
-const DocumentCard = ({ document, onView, onDelete }) => {
+const DocumentCard = ({ document, onView, onDelete, onViewText }) => {
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { 
@@ -85,28 +85,44 @@ const DocumentCard = ({ document, onView, onDelete }) => {
       ) : null}
 
       {/* Actions */}
-      <div className="flex items-center gap-2 pt-4 border-t border-yellow-500 border-opacity-20">
+      <div className="flex flex-col gap-2 pt-4 border-t border-yellow-500 border-opacity-20">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => onView && onView(document)}
+            disabled={document.processingStatus === 'processing'}
+            className={`flex-1 px-4 py-2 font-semibold rounded-lg flex items-center justify-center gap-2 transition-transform ${
+              document.processingStatus === 'processing'
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:scale-[1.02]'
+            }`}
+          >
+            <Eye className="w-4 h-4" />
+            {document.processingStatus === 'processing' ? 'Processing...' : 'View Summary'}
+          </button>
+          {onDelete && (
+            <button
+              onClick={() => onDelete(document._id)}
+              className="px-4 py-2 bg-red-500 bg-opacity-20 text-red-400 rounded-lg hover:bg-opacity-30 transition-all"
+              title="Delete document"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* View Extracted Text Button */}
         <button
-          onClick={() => onView && onView(document)}
+          onClick={() => onViewText && onViewText(document)}
           disabled={document.processingStatus === 'processing'}
-          className={`flex-1 px-4 py-2 font-semibold rounded-lg flex items-center justify-center gap-2 transition-transform ${
+          className={`w-full px-4 py-2 font-semibold rounded-lg flex items-center justify-center gap-2 transition-transform ${
             document.processingStatus === 'processing'
               ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
-              : 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-black hover:scale-[1.02]'
+              : 'bg-gray-700 bg-opacity-60 text-yellow-400 border border-yellow-500 border-opacity-30 hover:bg-opacity-80 hover:scale-[1.02]'
           }`}
         >
-          <Eye className="w-4 h-4" />
-          {document.processingStatus === 'processing' ? 'Processing...' : 'View Summary'}
+          <FileSearch className="w-4 h-4" />
+          View Extracted Text
         </button>
-        {onDelete && (
-          <button
-            onClick={() => onDelete(document._id)}
-            className="px-4 py-2 bg-red-500 bg-opacity-20 text-red-400 rounded-lg hover:bg-opacity-30 transition-all"
-            title="Delete document"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        )}
       </div>
     </div>
   );
