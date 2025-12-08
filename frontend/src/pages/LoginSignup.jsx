@@ -46,7 +46,7 @@ const AuthForm = ({ type, email, setEmail, password, setPassword, handleSubmit, 
           Processing...
         </span>
       ) : (
-        type === "signup" ? "Morph into Ranger" : type === "login" ? "Access Morphin Grid" : "Reset Power Coin"
+        type === "signup" ? "Register to Console" : type === "login" ? "Login to Console" : "Reset Password"
       )}
     </button>
   </div>
@@ -118,11 +118,11 @@ const LoginSignup = () => {
                     <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-500 flex items-center justify-center shadow-lg shadow-yellow-500/50 animate-spin" style={{ animationDuration: '20s' }}>
                       <span className="text-4xl font-bold text-black">⚡</span>
                     </div>
-                    <h2 className="text-4xl font-black text-yellow-400 mb-2 drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]">
-                      Ranger Access
+                    <h2 className="text-2xl font-black text-yellow-400 mb-2 drop-shadow-[0_0_20px_rgba(234,179,8,0.5)]">
+                      Welcome to DocNexus-AI
                     </h2>
                     <p className="text-yellow-500 text-opacity-70 text-sm">
-                      Enter the Command Center
+                      Enter the DocNexus Console
                     </p>
                   </div>
 
@@ -153,18 +153,18 @@ const LoginSignup = () => {
                           setError(null);
                         }}
                       >
-                        Lost your Power Coin?
+                        Reset Password?
                       </button>
 
                       <div className="mt-6 text-center">
                         <p className="text-yellow-500 text-opacity-50 text-sm mb-3">
-                          New Recruit?
+                          New to Console?
                         </p>
                         <button
                           onClick={handleFlip}
                           className="px-8 py-3 bg-transparent border-2 border-yellow-500 text-yellow-400 font-bold rounded-xl cursor-pointer transition-all duration-300 hover:bg-yellow-500 hover:text-black"
                         >
-                          Join the Team
+                          Register to Console
                         </button>
                       </div>
                     </>
