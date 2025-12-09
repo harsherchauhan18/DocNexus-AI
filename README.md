@@ -395,20 +395,30 @@ Authorization: Bearer <token>
 
 ## 📸 Screenshots
 
-### Home Page
-*Upload interface with drag-and-drop functionality*
+### Landing Page
+<img width="1920" height="1080" alt="Screenshot (3)" src="https://github.com/user-attachments/assets/a3fc488b-6ede-4a87-974b-a465ec9bedb2" />
 
-### Document Grid
-*Grid view showing all uploaded documents with summaries*
+### Login Signup Page
+<img width="1920" height="1080" alt="Screenshot (4)" src="https://github.com/user-attachments/assets/f894afd9-dfa7-4bfc-9911-3ef4b77e2226" />
+<img width="1920" height="1080" alt="Screenshot (26)" src="https://github.com/user-attachments/assets/cfe66f32-3e1d-4d78-8f27-1361bb4f3b82" />
 
-### Document Detail View
-*Comprehensive view with executive summary, key points, and analysis*
+### Drag and Drop Implementation
+<img width="896" height="461" alt="Screenshot 2025-12-09 084843" src="https://github.com/user-attachments/assets/048e6529-e11a-485b-8cfa-0e1c6451c61a" />
 
-### Search Interface
-*Real-time search across all documents*
+### Dashboard
+<img width="1433" height="422" alt="Screenshot 2025-12-09 084835" src="https://github.com/user-attachments/assets/e3905aab-2407-4324-ba18-678d0b3d52eb" />
 
-### Page Summary
-*Statistics and insights about your document collection*
+### Document Grid (History)
+<img width="1414" height="720" alt="Screenshot 2025-12-09 084853" src="https://github.com/user-attachments/assets/b3a575ba-4d62-4623-9c90-6d9beb50e9cf" />
+
+### Document Summary
+<img width="1101" height="762" alt="Screenshot 2025-12-09 084906" src="https://github.com/user-attachments/assets/12d97901-a262-43bc-8902-0e6f949bc706" />
+
+### Document Text
+<img width="1291" height="831" alt="Screenshot 2025-12-09 084917" src="https://github.com/user-attachments/assets/5f7d2d12-6c36-4a95-aabc-98bcaf8ae10c" />
+
+### SideBar for Executive Summary
+<img width="269" height="972" alt="Screenshot 2025-12-09 084928" src="https://github.com/user-attachments/assets/8e9dca99-6565-4a1a-b62a-c44ac7bd95d8" />
 
 ---
 
@@ -633,5 +643,6 @@ This project is licensed under the MNNIT Allahabad.
 [⬆ Back to Top](#-docnexus-ai)
 
 </div>
+
 
 
