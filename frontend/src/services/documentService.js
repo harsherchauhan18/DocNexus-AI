@@ -21,13 +21,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Create axios instance
-const api = axios.create({
-  baseURL: API_BASE_URL,
-  withCredentials: true,
-  timeout: 300000, // 5 minutes timeout for processing
-});
-
 // Request interceptor to add Authorization header
 api.interceptors.request.use(
   (config) => {
