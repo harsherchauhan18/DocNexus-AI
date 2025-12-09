@@ -6,7 +6,10 @@
 // Regex patterns for common sensitive data
 const patterns = {
   email: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-  phone: /(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
+  // Enhanced phone pattern for US and Indian formats
+  // US: (123) 456-7890, 123-456-7890, +1-123-456-7890
+  // Indian: 9876543210, +91 9876543210, +91-98765-43210, 91 98765 43210
+  phone: /(\+?91[-.\s]?)?[6-9]\d{9}\b|(\+?\d{1,3}[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g,
   ssn: /\b\d{3}-\d{2}-\d{4}\b/g,
   creditCard: /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g,
   zipCode: /\b\d{5}(-\d{4})?\b/g,
