@@ -21,6 +21,25 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// Create axios instance
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  timeout: 300000, // 5 minutes timeout for processing
+});
+
+// Request interceptor to add Authorization header
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 /**
  * Upload a document
  * @param {File} file - File to upload

@@ -84,6 +84,10 @@ const HomePage = () => {
     setSelectedDocument(document);
   };
 
+  const handleViewExtractedText = (document) => {
+    navigate(`/document/${document._id}/text`);
+  };
+
   const handleDeleteDocument = async (documentId) => {
     try {
       await deleteDocument(documentId);
@@ -98,7 +102,7 @@ const HomePage = () => {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate("/");
   };
 
   return (
@@ -302,6 +306,7 @@ const HomePage = () => {
                         key={doc._id}
                         document={doc}
                         onView={handleViewDocument}
+                        onViewText={handleViewExtractedText}
                         onDelete={handleDeleteDocument}
                       />
                     ))}
