@@ -2,6 +2,7 @@ import React from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import LandingPage from './pages/LandingPage'
 import LoginSignup from './pages/LoginSignup'
 import HomePage from './pages/HomePage'
 import ExtractedTextViewer from './pages/ExtractedTextViewer'
@@ -20,13 +21,19 @@ function App() {
   return (
     <Routes>
       <Route 
+        path="/" 
+        element={
+          isAuthenticated ? <Navigate to="/home" replace /> : <LandingPage />
+        } 
+      />
+      <Route 
         path="/login" 
         element={
-          isAuthenticated ? <Navigate to="/" replace /> : <LoginSignup />
+          isAuthenticated ? <Navigate to="/home" replace /> : <LoginSignup />
         } 
       />
       <Route
-        path="/"
+        path="/home"
         element={
           <ProtectedRoute>
             <HomePage />
